@@ -1,0 +1,46 @@
+Q1.
+SELECT id, title FROM category WHERE parent_id IS NULL 
+
+
+Q2.
+SELECT c1.id, c1.title FROM category c1 LEFT JOIN category c2 ON c2.parent_id = c1.id WHERE c2.id IS NULL 
+
+
+Q3.
+SELECT DISTINCT( c1.id), c1.title FROM category c1 INNER JOIN category c2 ON c2.parent_id = c1.id WHERE c2.id IS NOT NULL 
+
+
+
+Q4.
+WITH RECURSIVE category_path (id, title, path) AS
+  (
+    SELECT id, title, title as path
+    FROM parent
+    WHERE parent_id IS NULL
+    UNION ALL
+    SELECT p.id, p.title, CONCAT(cp.path, ' > ', p.title)
+    FROM category_path AS cp JOIN category AS p
+      ON cp.id = p.parent_id
+   )
+  SELECT * FROM category_path ORDER BY path;
+
+Q5.
+WITH RECURSIVE category_path (id, title, lvl) AS ( SELECT id, title, 0 lvl FROM category WHERE parent_id IS NULL UNION ALL SELECT c.id, c.title,cp.lvl + 1 FROM category_path AS cp JOIN category AS c ON cp.id = c.parent_id ) SELECT * FROM category_path ORDER BY lvl
+
+
+Q6.
+DELIMITER $$
+CREATE PROCEDURE im_child
+(IN con VARCHAR(20))
+BEGIN
+  SELECT id, title FROM category WHERE parent_id = 1;
+END $$
+DELIMITER ;
+
+
+for call the procedure:
+
+SET @p0='Electronics'; CALL `im_child`(@p0); 
+
+
+
